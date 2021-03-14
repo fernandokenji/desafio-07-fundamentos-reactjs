@@ -9,7 +9,7 @@ import Upload from '../../components/Upload';
 
 import { Container, Title, ImportFileContainer, Footer } from './styles';
 
-import alert from '../../assets/alert.svg';
+import alertHtml from '../../assets/alert.svg';
 import api from '../../services/api';
 
 interface FileProps {
@@ -23,19 +23,34 @@ const Import: React.FC = () => {
   const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    // const data = new FormData();
+    const data = new FormData();
 
-    // TODO
+    if (!uploadedFiles.length) {
+      alert('Não foi realizado o upload de nenhum arquivo.');
+      return;
+    }
 
     try {
-      // await api.post('/transactions/import', data);
+      const file = data.append(
+        'file',
+        uploadedFiles[0].file,
+        uploadedFiles[0].name,
+      );
+      await api.post('/transactions/import', file);
+      history.push('/');
     } catch (err) {
-      // console.log(err.response.error);
+      console.log(err.response.error);
     }
   }
 
   function submitFile(files: File[]): void {
-    // TODO
+    const upldFiles = files.map(file => ({
+      file,
+      name: file.name,
+      readableSize: filesize(file.size),
+    }));
+
+    setUploadedFiles(upldFiles);
   }
 
   return (
@@ -49,7 +64,7 @@ const Import: React.FC = () => {
 
           <Footer>
             <p>
-              <img src={alert} alt="Alert" />
+              <img src={alertHtml} alt="Alert" />
               Permitido apenas arquivos CSV
             </p>
             <button onClick={handleUpload} type="button">
